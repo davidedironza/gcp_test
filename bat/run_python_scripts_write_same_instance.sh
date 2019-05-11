@@ -5,7 +5,7 @@
 #echo "git repo cloned"
 
 cd gcp_test
-git pull
+#git pull
 
 cd source
 
