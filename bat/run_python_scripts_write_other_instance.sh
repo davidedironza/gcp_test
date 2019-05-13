@@ -4,4 +4,12 @@
 #git clone https://github.com/davidedironza/gcp_test.git
 #echo "git repo cloned"
 
-gcloud compute ssh instance-5 --zone europe-west6-a -- 'cd gcp_test/source && cd python3 python_script_write1.py'
+# separate commands in on-liner with &&, not needed if separated by rows
+
+gcloud compute ssh instance-5 --zone europe-west6-a --command '
+cd gcp_test/source
+python3 python_script_write1.py
+echo "Write 1 executed"
+python3 python_script_write2.py
+echo "Write 2 executed"
+'
