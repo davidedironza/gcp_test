@@ -6,7 +6,7 @@
 
 # separate commands in on-liner with &&, not needed if separated by rows
 
-export INSTANCE_NAME="instance-bindexis"
+export INSTANCE_NAME="instance-5"
 
 gcloud compute instances start $INSTANCE_NAME
 
