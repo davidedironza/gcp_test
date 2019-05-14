@@ -8,7 +8,7 @@
 
 export INSTANCE_NAME="instance-bindexis"
 
-gcloud compute instances start $INSTANCE_NAME
+gcloud compute instances start $INSTANCE_NAME --zone europe-west6-a
 
 gcloud compute ssh $INSTANCE_NAME --zone europe-west6-a --command '
 cd gcp_test/source
@@ -16,6 +16,7 @@ python3 python_script_write1.py
 echo "Write 1 executed"
 python3 python_script_write2.py
 echo "Write 2 executed"
+exit
 '
 
 #gcloud compute instances stop $INSTANCE_NAME
