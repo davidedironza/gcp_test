@@ -19,4 +19,4 @@ echo "Write 2 executed"
 exit
 '
 
-#gcloud compute instances stop $INSTANCE_NAME
+gcloud compute instances stop $INSTANCE_NAME --zone europe-west6-a
