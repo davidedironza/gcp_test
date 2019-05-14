@@ -18,4 +18,4 @@ python3 python_script_write2.py
 echo "Write 2 executed"
 '
 
-gcloud compute instances stop $INSTANCE_NAME
+#gcloud compute instances stop $INSTANCE_NAME
