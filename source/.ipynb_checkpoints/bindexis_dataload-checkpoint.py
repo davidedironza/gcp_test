@@ -28,6 +28,8 @@ try:
     from random import randint
     from google.cloud import bigquery
     from google.cloud import storage
+    import sys
+
 
     #0.2 Set Stage
     stage = "DEV" if os.environ['PROJECT']=='axa-ch-datalake-analytics-dev' else "PROD" #sf.platform_is_server("stage")
@@ -413,4 +415,48 @@ try:
             job.wait_until_finish()
             print("Done!")
 
-except:
+#    preprocess(in_test_mode=True, file_name='df_projects.avro', 
+#               project_id=PROJECT, bucket_id=BUCKET, 
+#               dataset_id=DATASET, table_id='bindexis_bau_projects2', list_name=project_list)
+
+#    preprocess(in_test_mode=True, file_name='df_buildings.avro', 
+#               project_id=PROJECT, bucket_id=BUCKET, 
+#               dataset_id=DATASET, table_id='bindexis_bau_buildings2', list_name=building_list)
+
+#    preprocess(in_test_mode=True, file_name='df_contacts.avro', 
+#               project_id=PROJECT, bucket_id=BUCKET, 
+#               dataset_id=DATASET, table_id='bindexis_bau_contacts2', list_name=contact_list)
+
+    sys.exit(0)
+
+except Exception:
+    #3   Exception Handling, Backup, Reporting
+    #3.1 eMail-Benachrichtigung Exception
+    print("3.1")
+    time_now_ex      = datetime.datetime.now(pytz.timezone('Europe/Zurich'))
+    email_to = "davide.dironza@axa.ch; gerhard.pachl@axa.ch; "   
+    email_subject = u"CC D&A Scheduling: Aufbereitung Bindexis-Bauausschreibungen"
+    email_body = u"""Lieber Tobias, 
+    die Aufbereitung der Bindexis-Bauausschreibungen verursachte einen Fehler. 
+    Datum: {0}
+    Fehlermeldung: 
+
+    {1}
+
+    This mail is powered by Python, the Programming Language of Leading Data Scientists.""".format(time_now_ex.strftime('%d.%m.%Y'), traceback.format_exc())
+    
+    #aux.send_email(subject = email_subject, body = email_body, to = email_to, use_amg = True)
+
+    sys.exit(1)
+
+else:     
+    #3.2 Speicherung Parameter & Backup bei erfolgreichem Lauf
+    print("3.2")
+    if stage == "DEV2":
+    #if stage == "PROD": 
+        filename = "{}/Parameter_TimeLastRun.pkl".format(tempfile.gettempdir())
+        with open(filename, 'wb') as fp: pickle.dump(time_now, fp)
+        blob = bucket_cs.blob(path_data_va+'Parameter_TimeLastRun.pkl')
+        blob.upload_from_filename(filename)
+
+    sys.exit(0)
