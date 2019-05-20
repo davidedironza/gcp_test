@@ -183,7 +183,7 @@ try:
     #     df_projects = sf.sql_getdf(sql_statement, con_tdb, column_lower = False)  
 
 
-    sql_statement = """SELECT * FROM `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_projects2`
+    sql_statement = """SELECT * FROM `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_projects`
                     where PROJECT_INRESEARCH = 0 
                     and ADDRESS_COUNTRY = "CH" 
                     and DATE_INSERTION > '{0}' """.format(campaign_timelastrun.strftime("%Y-%m-%d")) 
@@ -199,7 +199,7 @@ try:
     sql_statement = """CREATE OR REPLACE TABLE `axa-ch-datalake-analytics-dev.temp_da.tmp_bau_projects`
     OPTIONS(  expiration_timestamp=TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 120 MINUTE)) AS
     SELECT distinct PROJECT_ID
-    FROM `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_projects2`
+    FROM `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_projects`
     where PROJECT_INRESEARCH = 0 and ADDRESS_COUNTRY = "CH" 
     and DATE_INSERTION > '{0}' """.format(campaign_timelastrun.strftime("%Y-%m-%d")) 
 
@@ -243,7 +243,7 @@ try:
         b.ORG_STREET3, b.ORG_POSTALCODE, b.ORG_CITY, b.ORG_COUNTRY, b.ORG_PHONE, b.PERSON_PHONE, b.PERSON_MOBILE, b.ORG_EMAIL, 
         b.PERSON_EMAIL, b.ORG_WEB, b.PERSON_ID
         FROM       `axa-ch-datalake-analytics-dev.temp_da.tmp_bau_projects` a
-        left join `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_contacts2` b
+        left join `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_contacts` b
         on a.PROJECT_ID = b.PROJECT_ID
     """
 
@@ -251,10 +251,10 @@ try:
 
     sql = """SELECT a.PROJECT_ID, b.BUILDING_TYPE, b.BUILDING_DEVELOPMENT 
         FROM       `axa-ch-datalake-analytics-dev.temp_da.tmp_bau_projects` a    
-        LEFT JOIN  `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_buildings2` b
+        LEFT JOIN  `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_buildings` b
         on a.PROJECT_ID = b.PROJECT_ID"""
 
-    # change by `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_buildings2`
+    # change by `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_buildings`
 
     df_buildings = client.query(sql).to_dataframe()
 
@@ -1014,15 +1014,15 @@ else:
     if stage == "ACC": 
         try:
             campaign_timelastrun = datetime.datetime.now(pytz.timezone('Europe/Zurich'))
-            filename = "{}/kampagne2.pkl".format(tempfile.gettempdir())
+            filename = "{}/kampagne.pkl".format(tempfile.gettempdir())
             with open(filename, 'wb') as fp: pickle.dump(campaign_timelastrun, fp)
-            blob = bucket_cs.blob(path_data_va+'kampagne2.pkl')
+            blob = bucket_cs.blob(path_data_va+'kampagne.pkl')
             blob.upload_from_filename(filename)
             print("6.2 wa backup try")
         except:
             print("attention: except true")
         
-        print(campaign_timelastrun)
+        print(campaign_timelastrun)     
     
     # workaround zu campaign.backup(tranche, var_list) rück schreiben des Zeitpunkts 
     # 'gs://axa-ch-raw-dev-dla/bindexis/data/various/kampagne.pkl' 
