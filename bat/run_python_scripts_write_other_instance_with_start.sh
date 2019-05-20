@@ -19,7 +19,7 @@ cd
 
 gcloud compute ssh $INSTANCE_NAME --zone europe-west6-a --command '
 cd gcp_test/source
-python3 python_script_write1.py
+python2 bindexis_dataload.py
 OK="$?"
 echo $OK
 if [ "$OK" -eq 0 ]

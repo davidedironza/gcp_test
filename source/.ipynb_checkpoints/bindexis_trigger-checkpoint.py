@@ -982,7 +982,7 @@ try:
         print('nun folgt der SOA Aufruf und tranche.route_to_hybris ...')
     # 20190516*gep: näcshte Zeile als Trick damit es keinen Abbruch gibt, da keine echte Kanalaufspielung
         tranche.tranche_status = "3: Konstante"
-        tranche.route_to_hybris(interaction_mapping, contact_mapping, nvp_mapping)
+        #tranche.route_to_hybris(interaction_mapping, contact_mapping, nvp_mapping)
         print("Ausgabe nach run tranche.route_to_hybris")
 
 except Exception:
