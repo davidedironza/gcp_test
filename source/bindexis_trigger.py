@@ -24,7 +24,7 @@ import os
 import importlib
 import tempfile
 import sys
-sys.path.insert(0, './functions')
+sys.path.insert(0, '../functions')
   
 import auxiliary_gc as aux
 importlib.reload(aux)
