@@ -1014,15 +1014,15 @@ else:
     if stage == "ACC": 
         try:
             campaign_timelastrun = datetime.datetime.now(pytz.timezone('Europe/Zurich'))
-            filename = "{}/kampagne.pkl".format(tempfile.gettempdir())
+            filename = "{}/kampagne2.pkl".format(tempfile.gettempdir())
             with open(filename, 'wb') as fp: pickle.dump(campaign_timelastrun, fp)
-            blob = bucket_cs.blob(path_data_va+'kampagne.pkl')
+            blob = bucket_cs.blob(path_data_va+'kampagne2.pkl')
             blob.upload_from_filename(filename)
             print("6.2 wa backup try")
         except:
             print("attention: except true")
         
-        print(campaign_timelastrun)     
+        print(campaign_timelastrun)
     
     # workaround zu campaign.backup(tranche, var_list) rück schreiben des Zeitpunkts 
     # 'gs://axa-ch-raw-dev-dla/bindexis/data/various/kampagne.pkl' 

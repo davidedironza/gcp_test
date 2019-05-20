@@ -452,7 +452,7 @@ except Exception:
 else:     
     #3.2 Speicherung Parameter & Backup bei erfolgreichem Lauf
     print("3.2")
-    if stage == "DEV2":
+    if stage == "DEV":
     #if stage == "PROD": 
         filename = "{}/Parameter_TimeLastRun.pkl".format(tempfile.gettempdir())
         with open(filename, 'wb') as fp: pickle.dump(time_now, fp)
