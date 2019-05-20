@@ -65,7 +65,7 @@ except:
 	print("except: pickle file kann nicht geöffnet werden, daher campaign_timelastrun als Tagesdatum - 1")
 	campaign_timelastrun      = time_now + datetime.timedelta(days=-1)
 
-#print(campaign_timelastrun)
+print(campaign_timelastrun)
 
 
 # Achtung dieses Zertifikat muss von Sandor noch neu erstellt werden
