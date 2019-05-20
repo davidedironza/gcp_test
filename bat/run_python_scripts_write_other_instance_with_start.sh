@@ -24,8 +24,8 @@ OK="$?"
 echo $OK
 if [ "$OK" -eq 0 ]
 then
-    python3 python_script_write2.py
-    echo "Write 2 executed"
+    python3 bindexis_trigger.py
+    echo "Bindexis Trigger executed"
 else
     echo "Fehler"
 fi
