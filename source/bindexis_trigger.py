@@ -54,7 +54,7 @@ time_now      = datetime.datetime.now(pytz.timezone('Europe/Zurich'))
 client_cs = storage.Client()
 bucket_cs = client_cs.get_bucket(BUCKET)
 try:
-	filename = "{}/kampagne.pkl".format(tempfile.gettempdir())
+	filename = "{}/kampagne_falsch.pkl".format(tempfile.gettempdir())
 	#blob = bucket_cs.blob(path_data_va+'Parameter_TimeLastRun.txt')
 	#time_last_run = blob.download_as_string()
 	#time_last_run = datetime.datetime.strptime(time_last_run.decode("utf-8")[:-6], "%Y-%m-%d %H:%M:%S.%f")
