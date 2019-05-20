@@ -10,7 +10,7 @@ from google.cloud import storage
 BUCKET = 'axa-ch-raw-dev-dla'
 PROJECT = 'axa-ch-datalake-analytics-dev'
 REGION = 'eu-west6'
-	
+
 import re
 import random
 import locale
@@ -41,7 +41,7 @@ path_data_va = "bindexis/data/various/"
 path_data_input = "bindexis/data/input/"
 
 path_data = 'gs://axa-ch-raw-dev-dla/bindexis/data/various/kampagne.pkl'    
-	
+
 #0.3 Set timezone
 os.environ['TZ'] = 'Europe/Zurich'
 time.tzset()
@@ -55,7 +55,7 @@ client_cs = storage.Client()
 bucket_cs = client_cs.get_bucket(BUCKET)
 
 print("except: pickle file kann nicht geöffnet werden, daher campaign_timelastrun als Tagesdatum - 1")
-campaign_timelastrun      = time_now + datetime.timedelta(days=-1)
+campaign_timelastrun = time_now + datetime.timedelta(days=-1)
 
 print(campaign_timelastrun)
 
@@ -66,21 +66,21 @@ print(campaign_timelastrun)
 
 # function for setting expiration date of a table - mainly fpr temporary tables
 def tmp_table_expiration(table_ref_in, minutes_in):
-	table = client.get_table(table_ref_in) 
+    table = client.get_table(table_ref_in) 
 #assert table.expires is None
-	expiration = datetime.datetime.now(pytz.utc) + datetime.timedelta(minutes=minutes_in)
-	table.expires = expiration
-	table_ref = client.update_table(table, ["expires"])  # API request
+    expiration = datetime.datetime.now(pytz.utc) + datetime.timedelta(minutes=minutes_in)
+    table.expires = expiration
+    table_ref = client.update_table(table, ["expires"])  # API request
 
 # function needed for check if created table already present or the program must set a short sleep 
 # until creation is finished
 def bq_tbl_exists(client, table_ref):
-	from google.cloud.exceptions import NotFound
-	try:
-		client.get_table(table_ref)
-		return True
-	except NotFound:
-		return False 
+    from google.cloud.exceptions import NotFound
+    try:
+        client.get_table(table_ref)
+        return True
+    except NotFound:
+        return False 
 
 # needed for checking if bq temporary table exists
 project_nm = 'axa-ch-datalake-analytics-dev'
@@ -124,9 +124,9 @@ with dev_ad_de as
 (select de_id, de_name_kurz as GA_NAME, sprache_cdi as GA_SPRACHE, de_typ_cddev, count(de_id) AS counts
  from `axa-ch-data-engineering-dev.various.va_dev_ad_de`
  where de_id in (select distinct GA_NL_B
-					   from `axa-ch-data-engineering-dev.contract.cr_aktpol_m`
-					   where stichtag = (select max(stichtag) from `axa-ch-data-engineering-dev.contract.cr_aktpol_m`)
-					   and kanal_b in ('AD', 'DIREKT'))
+                    from `axa-ch-data-engineering-dev.contract.cr_aktpol_m`
+                    where stichtag = (select max(stichtag) from `axa-ch-data-engineering-dev.contract.cr_aktpol_m`)
+                    and kanal_b in ('AD', 'DIREKT'))
  group by de_id, ga_name, ga_sprache, de_typ_cddev)
  , ranked as (select de_id, ga_name, ga_sprache, de_typ_cddev, 
  ROW_NUMBER() OVER (PARTITION BY de_id ORDER BY counts DESC) rank from dev_ad_de)
@@ -146,7 +146,7 @@ df_dict = df_dict[['GA_SPRACHE']]
 
 ga_dict = df_dict.to_dict('index')
 for key, value in ga_dict.items():
-	ga_dict[key] = value.get('GA_SPRACHE')
+    ga_dict[key] = value.get('GA_SPRACHE')
 	
 prospect_sharekg = 0.05
 #ga_dict
@@ -154,19 +154,19 @@ prospect_sharekg = 0.05
 # 20190429*gep hier geht es erstmal weiter #0.5 Initialisierung Kampagnen-Objekt campaign = cm.Campaign
 #0.5 Initialisierung Kampagnen-Objekt
 campaign = cm.Campaign(campaign_id              = 80017,
-					   campaign_name            = "Bindexis Bauausschreibungen", 
-					   campaign_manager         = ["thomas.knell@axa-winterthur.ch"],
-					   campaign_techsupport     = ["tobias.ippisch@axa-winterthur.ch",
-												   "natascha.spindler@axa-winterthur.ch",
-												   "IMCEASMS-0041799422212@sms.wgr"],                  
-					   campaign_sharekg         = "Permanent",
-					   campaign_channelsplit    = {"AD": 1.0},                                                       
-					   campaign_channelsplitvar = None,               
-					   campaign_startdate       = "16.10.2017",
-					   campaign_enddate         = "31.12.2025",
-					   campaign_lineofbusiness  = "NL",
-					   campaign_pathdata        = path_data, 
-					   campaign_trackausschluss = True)
+                    campaign_name            = "Bindexis Bauausschreibungen", 
+                    campaign_manager         = ["thomas.knell@axa-winterthur.ch"],
+                    campaign_techsupport     = ["tobias.ippisch@axa-winterthur.ch",
+                                                "natascha.spindler@axa-winterthur.ch",
+                                                "IMCEASMS-0041799422212@sms.wgr"],                  
+                    campaign_sharekg         = "Permanent",
+                    campaign_channelsplit    = {"AD": 1.0},                                                       
+                    campaign_channelsplitvar = None,               
+                    campaign_startdate       = "16.10.2017",
+                    campaign_enddate         = "31.12.2025",
+                    campaign_lineofbusiness  = "NL",
+                    campaign_pathdata        = path_data, 
+                    campaign_trackausschluss = True)
 
 
 #1   Ziehung Rohdaten
@@ -183,9 +183,9 @@ campaign = cm.Campaign(campaign_id              = 80017,
 
 
 sql_statement = """SELECT * FROM `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_projects`
-				   where PROJECT_INRESEARCH = 0 
-				   and ADDRESS_COUNTRY = "CH" 
-				   and DATE_INSERTION > '{0}' """.format(campaign_timelastrun.strftime("%Y-%m-%d")) 
+                where PROJECT_INRESEARCH = 0 
+                and ADDRESS_COUNTRY = "CH" 
+                and DATE_INSERTION > '{0}' """.format(campaign_timelastrun.strftime("%Y-%m-%d")) 
 
 df_projects = client.query(sql_statement).to_dataframe()
 
