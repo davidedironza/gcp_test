@@ -985,11 +985,14 @@ try:
         #tranche.route_to_hybris(interaction_mapping, contact_mapping, nvp_mapping)
         print("Ausgabe nach run tranche.route_to_hybris")
 
+    sys.exit(0)
 except Exception:
     #6   Exception Handling, Backup, Reporting
     #6.1 eMail-Benachrichtigung Exception
     print("6.1")
     tranche.report_exception(traceback.format_exc())
+    
+    sys.exit(1)
 
 else:
     #6.2 Erstellung Backup 
@@ -1021,3 +1024,5 @@ else:
     # tranche.report_success()
     
     print("6.4: trigger run beendet")
+    
+    sys.exit(0)
