@@ -33,7 +33,8 @@ try:
 
     #0.2 Set Stage
     stage = "DEV" if os.environ['PROJECT']=='axa-ch-datalake-analytics-dev' else "PROD" #sf.platform_is_server("stage")
-
+    print(stage)
+    
     #0.3 Pfadinformationen
     path_data_va = "bindexis/data/various/"
     path_data_input = "bindexis/data/input/"
