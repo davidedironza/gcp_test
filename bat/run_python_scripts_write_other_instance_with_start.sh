@@ -10,12 +10,16 @@ export INSTANCE_NAME="instance-bindexis"
 
 gcloud compute instances start $INSTANCE_NAME --zone europe-west6-a
 
+sleep 10
+
 gcloud compute ssh $INSTANCE_NAME --zone europe-west6-a --command '
 cd gcp_test
 git pull https://github.com/davidedironza/gcp_test.git
 echo "git repo pulled"
 cd
 '
+
+sleep 10
 
 gcloud compute ssh $INSTANCE_NAME --zone europe-west6-a --command '
 cd gcp_test/source
