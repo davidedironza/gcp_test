@@ -428,8 +428,6 @@ try:
 #               project_id=PROJECT, bucket_id=BUCKET, 
 #               dataset_id=DATASET, table_id='bindexis_bau_contacts2', list_name=contact_list)
 
-    sys.exit(0)
-
 except Exception:
     #3   Exception Handling, Backup, Reporting
     #3.1 eMail-Benachrichtigung Exception
