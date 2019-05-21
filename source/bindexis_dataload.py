@@ -416,17 +416,17 @@ try:
             job.wait_until_finish()
             print("Done!")
 
-#    preprocess(in_test_mode=True, file_name='df_projects.avro', 
-#               project_id=PROJECT, bucket_id=BUCKET, 
-#               dataset_id=DATASET, table_id='bindexis_bau_projects2', list_name=project_list)
+    preprocess(in_test_mode=True, file_name='df_projects.avro', 
+               project_id=PROJECT, bucket_id=BUCKET, 
+               dataset_id=DATASET, table_id='bindexis_bau_projects2', list_name=project_list)
 
-#    preprocess(in_test_mode=True, file_name='df_buildings.avro', 
-#               project_id=PROJECT, bucket_id=BUCKET, 
-#               dataset_id=DATASET, table_id='bindexis_bau_buildings2', list_name=building_list)
+    preprocess(in_test_mode=True, file_name='df_buildings.avro', 
+               project_id=PROJECT, bucket_id=BUCKET, 
+               dataset_id=DATASET, table_id='bindexis_bau_buildings2', list_name=building_list)
 
-#    preprocess(in_test_mode=True, file_name='df_contacts.avro', 
-#               project_id=PROJECT, bucket_id=BUCKET, 
-#               dataset_id=DATASET, table_id='bindexis_bau_contacts2', list_name=contact_list)
+    preprocess(in_test_mode=True, file_name='df_contacts.avro', 
+               project_id=PROJECT, bucket_id=BUCKET, 
+               dataset_id=DATASET, table_id='bindexis_bau_contacts2', list_name=contact_list)
 
 except Exception:
     #3   Exception Handling, Backup, Reporting
@@ -446,7 +446,7 @@ except Exception:
     
     #aux.send_email(subject = email_subject, body = email_body, to = email_to, use_amg = True)
 
-    sys.exit(1)
+    print(traceback.format_exc())
 
 else:     
     #3.2 Speicherung Parameter & Backup bei erfolgreichem Lauf

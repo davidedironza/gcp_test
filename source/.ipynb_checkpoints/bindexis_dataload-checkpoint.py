@@ -446,7 +446,7 @@ except Exception:
     
     #aux.send_email(subject = email_subject, body = email_body, to = email_to, use_amg = True)
 
-    sys.exit(1)
+    print(traceback.format_exc())
 
 else:     
     #3.2 Speicherung Parameter & Backup bei erfolgreichem Lauf
