@@ -4,8 +4,8 @@ try:
     #0.1 Modul-Import
     
     # important if test or prod_mode
-    run_mode = "prod"
-    run_mode = "test"
+    run_mode = "go"
+    #run_mode = "test"
     print("run_mode: ", run_mode)
     
     from google.cloud import bigquery
@@ -37,10 +37,11 @@ try:
     
     import campaign_management_gc as cm
     importlib.reload(cm)
-    
+  
     #import functions.soa_gc as soa
     import soa_gc as soa
     importlib.reload(soa)
+ 
 
     #0.2 Pfadinformationen
     path_data_va = "bindexis/data/various/"
@@ -57,6 +58,7 @@ try:
     #0.4 Access & Authentication Setup
     print('0.4')
     time_now      = datetime.datetime.now(pytz.timezone('Europe/Zurich'))
+
    
     # Achtung dieses Zertifikat muss von Sandor noch neu erstellt werden
     # und wir müssen die Standardfunktion soa_marketinginteraktiondatenpush_1
@@ -85,7 +87,7 @@ try:
     dataset_nm = 'temp_da'
     table_nm = 'tmp_bau_projects'
     
-    client = bigquery.Client(project=project_nm,location="europe-west6")
+    client = bigquery.Client(project=project_nm,location="europe-west6")   
 
     dataset = client.dataset(dataset_nm)
     table_ref = dataset.table(table_nm)    
@@ -162,6 +164,7 @@ try:
         
     prospect_sharekg = 0.05
     #ga_dict
+
     
     # 20190429*gep hier geht es erstmal weiter #0.5 Initialisierung Kampagnen-Objekt campaign = cm.Campaign
     #0.5 Initialisierung Kampagnen-Objekt
@@ -203,13 +206,16 @@ try:
         cond_str = "date(DATE_INSERTION)" 
     
     sql = """SELECT * FROM `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_projects2`
-                 where PROJECT_INRESEARCH = 0 
+                 where PROJECT_INRESEARCH = false
                  and ADDRESS_COUNTRY = "CH" 
                  and {0} > '{1}' """.format(cond_str, campaign_timelastrun.strftime("%Y-%m-%d"))
 
-    # print(sql)
+   #  print(sql)
     
     df_projects = client.query(sql).to_dataframe()
+    
+    print(df_projects.PROJECT_ID.count())
+
     
     if df_projects.PROJECT_ID.count() == 0:
         print("no valid building projects data found")
@@ -218,7 +224,7 @@ try:
     sql = """CREATE OR REPLACE TABLE `axa-ch-datalake-analytics-dev.temp_da.tmp_bau_projects`
              OPTIONS( expiration_timestamp=TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 120 MINUTE)) AS
              SELECT distinct PROJECT_ID FROM `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_projects2`
-                    where PROJECT_INRESEARCH = 0 and ADDRESS_COUNTRY = "CH"
+                    where PROJECT_INRESEARCH = false and ADDRESS_COUNTRY = "CH"
                     and {0} > '{1}' """.format(cond_str, campaign_timelastrun.strftime("%Y-%m-%d"))
 
     # print(sql)
@@ -277,6 +283,7 @@ try:
     # change by `axa-ch-datalake-analytics-dev.BINDEXIS.bindexis_bau_buildings`
     
     df_buildings = client.query(sql).to_dataframe()
+
     
     #1.2 Aufbereitung Projektdaten
     print("1.2")
@@ -526,12 +533,24 @@ try:
     #2.2 Anschlüsselung führender Partner an Projekt (und Entfernen von Projekte ohne führenden Partner)
     print("2.2")
     df_projects = df_projects.merge(df_temp, on = "PROJECT_ID", how = "inner") 
+     
+#except:
+#    print("error")    
+
+    if df_projects.PROJECT_ID.count() == 0:
+        print("no valid building projects data found")
+        raise Exception
     
     #Projekte mit Bauherren im Ausland werden ausgeschlossen
     df_projects["AUX_CH"] = df_projects.apply(lambda row: 1 if ((row.CONTACT_TYPE == "Bauherr") & (row.CONTACT_COUNTRY != "CH")) else 0, axis = 1)
     df_projects = df_projects[df_projects.AUX_CH == 0]
     del df_projects["AUX_CH"]
-    
+
+# except:
+#    print("error")
+        
+
+   
     #2.3 Fokus auf 1 Lead pro CONTACT_ID & Tag (Architektur-Defizit Pilot-Schnittstelle)
     print("2.3")
     df_projects = df_projects.drop_duplicates("CONTACT_ID") 
@@ -951,6 +970,14 @@ try:
                            "ref_bo_klsfkn_cdu":     "REF_BO_KLSFKN_CDU",
                            "ref_bo_id":             "PROJECT_ID", 
                            "ntz_txt_lang":          "BINDEXIS_AD_LEAD_INFO"}
+    print(type(interaction_mapping))
+    if type(interaction_mapping) == dict:
+        aux_dict2 = {}
+        for i in interaction_mapping.keys(): 
+            print(i)
+            print(row[interaction_mapping[i]])
+            aux_dict2[i] = row[interaction_mapping[i]]  
+            print(aux_dict[i])
     
     contact_mapping = {"iaktn_kntkt_ref_id":             "CONTACT_ID",
                        "iaktn_kntkt_ref_typ_cdymkt":     "IAKTN_KNTKT_REF_TYP_CDYMKT",                                       
@@ -986,14 +1013,19 @@ try:
     
     #SOA service call 
     count_sel = df_projects.PROJECT_ID.count()
+    print ("count_sel: ", count_sel)
+
+#try:
     
-    if stage == "ACC" and run_mode == "":
-        print ("count_sel: ", count_sel)
-        print('nun folgt der SOA Aufruf und tranche.route_to_hybris ...')
+    if stage == "ACC" and run_mode == "go":
+        if count_sel > 0:
+            print('nun folgt der SOA Aufruf und tranche.route_to_hybris ...')
     # 20190516*gep: näcshte Zeile als Trick damit es keinen Abbruch gibt, da keine echte Kanalaufspielung
-        tranche.tranche_status = "3: Konstante"
-        tranche.route_to_hybris(interaction_mapping, contact_mapping, nvp_mapping)
-        print("Ausgabe nach run tranche.route_to_hybris")
+            tranche.tranche_status = "3: Konstante"
+            tranche.route_to_hybris(interaction_mapping, contact_mapping, nvp_mapping)
+            print("Ausgabe nach run tranche.route_to_hybris")
+        else:
+            print("no valid entries to transfer to hybris")
 
 except Exception:
     #6   Exception Handling, Backup, Reporting
@@ -1002,7 +1034,7 @@ except Exception:
     print("hier normal Aufruf tranche.report_exception(traceback.format_exc()) - im GCP PoC nicht")
     # tranche.report_exception(traceback.format_exc())
 
-    print(traceback.format_exc())
+    # print(traceback.format_exc())
     
 else:
     #6.2 Erstellung Backup 
@@ -1011,8 +1043,8 @@ else:
     column_list = list(tranche.tranche_df.columns.values)
     
     #Variablenliste: Basisinformation" 
-#    var_list =  ["KANAL",  "TRANCHE_KG", "TRANCHE_NUMMER", "TRANCHE_DATUM", "GA", "PART_NR", 
-#                 "MATCH_TYPE", "MATCH_SCORE", "API_RESULT"]
+    #var_list =  ["KANAL",  "TRANCHE_KG", "TRANCHE_NUMMER", "TRANCHE_DATUM", "GA", "PART_NR", 
+    #             "MATCH_TYPE", "MATCH_SCORE", "API_RESULT"]
 
     var_list =  ["KANAL",  "TRANCHE_KG", "TRANCHE_NUMMER", "TRANCHE_DATUM", "GA", "PART_NR", 
                  "MATCH_TYPE", "MATCH_SCORE"]
@@ -1028,7 +1060,7 @@ else:
     
    
 # 20190520*gep workaround 62 Speicherung Zeit Parameter bei erfolgreichem Lauf
-    if stage == "ACC" and run_mode == "prod": 
+    if stage == "ACC" and run_mode == "go": 
         print("6.2: workaround for campaign.backup(tranche, var_list) --> campaign_timelastrun")
     # campaign.backup(tranche, var_list)
         try:
@@ -1053,4 +1085,3 @@ else:
     
     print("6.4: trigger run beendet")
     
-    sys.exit(0)

@@ -303,7 +303,7 @@ try:
             tableId=table_id)
 
         table_schema = {
-            "fields": [{"name": i[0] , "type": i[2].replace('INT','INTEGER')} for i in list_name]
+            "fields": [{"name": i[0] , "type": i[2].replace('INT','INTEGER').replace("TIMESTAMP","DATETIME")} for i in list_name]
         }
 
         if in_test_mode:
@@ -351,6 +351,7 @@ try:
                     #elif i[2]     == "TIMESTAMP": df[i[0]] = df[i[0]].apply(lambda x: pd.to_datetime(x, format = "%Y-%m-%dT%H:%M:%S")).fillna(datetime.datetime(1900,1,1))
                     #elif i[2]     == "FLOAT":     df[i[0]] = df[i[0]].astype(float).fillna(0)
                     if (i[2]     == "STRING") & (data_item[i[0]]!=None):    data_item[i[0]] = data_item[i[0]].replace("\r\n", " ").replace("\n", " ")
+                    elif (i[2]     == "TIMESTAMP") & (data_item[i[0]]!=None):    data_item[i[0]] = data_item[i[0]][:-6]
 
                 #Cleaning df_projects
                 if table_id=='df_projects':
@@ -401,6 +402,9 @@ try:
         # Write the file
         (p
             | 'ReadAvroFromGCS' >> beam.io.avroio.ReadFromAvro('gs://{0}/{1}{2}'.format(BUCKET,path_data_va,file_name))
+    #        | 'ReadAvroFromGCS' >> beam.io.avroio.ReadFromAvro(file_name)
+            #| beam.Map(json.dumps)
+            #| beam.Map(json.loads)
             | 'data_cleanser' >> beam.ParDo(data_cleanser(list_name))
             | 'WriteToBigQuery' >> beam.io.WriteToBigQuery(
                 table_spec,
@@ -408,6 +412,8 @@ try:
                 #write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
                 write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
                 create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED)
+            #| 'write_out' >> beam.io.Write(beam.io.WriteToText(os.path.join(OUTPUT_DIR, '{}.csv'.format(table_id)), num_shards=1))
+            #| 'Printer the data 01' >> beam.ParDo(Printer())
             )
 
         # Run the pipeline
@@ -416,17 +422,6 @@ try:
             job.wait_until_finish()
             print("Done!")
 
-#    preprocess(in_test_mode=True, file_name='df_projects.avro', 
-#               project_id=PROJECT, bucket_id=BUCKET, 
-#               dataset_id=DATASET, table_id='bindexis_bau_projects2', list_name=project_list)
-
-#    preprocess(in_test_mode=True, file_name='df_buildings.avro', 
-#               project_id=PROJECT, bucket_id=BUCKET, 
-#               dataset_id=DATASET, table_id='bindexis_bau_buildings2', list_name=building_list)
-
-#    preprocess(in_test_mode=True, file_name='df_contacts.avro', 
-#               project_id=PROJECT, bucket_id=BUCKET, 
-#               dataset_id=DATASET, table_id='bindexis_bau_contacts2', list_name=contact_list)
 
 except Exception:
     #3   Exception Handling, Backup, Reporting
