@@ -28,7 +28,7 @@ def kg_assigner(kg_share):
     
 #%% 3)
     
-def send_email(subject, body, to, cc = "", bcc = "", sender = "mdc.scheduler@axa-winterthur.ch", 
+def send_email(subject, body, to, cc = "", bcc = "", sender = "ccda@axa-winterthur.ch", 
                attachment = "", use_amg = False):
     """Wrapper function for sending eMails via MS Outlook Application or AXA Application Mail Gateway (AMG, on Server only)
     Owner: Tobias Ippisch

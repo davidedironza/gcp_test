@@ -1,0 +1,7 @@
+requests>=2.21.0
+numpy>=1.16.3
+pandas>=0.24.2
+google-cloud-storage>=1.15.0
+google-cloud-bigquery>=1.11.2
+pyarrow>=0.13.0
+fastparquet>=0.3.0

@@ -15,6 +15,9 @@ import traceback
 
 import xml.etree.cElementTree as ET
 
+# first get certificate file  - 20190515*gep new for test purposes
+from google.cloud import storage
+import tempfile
 
 
 #%% General Functions 
@@ -167,13 +170,13 @@ def soa_dictmapper(row, mapping):
     if type(mapping) == dict:
         aux_dict = {}
         for i in mapping.keys(): 
-            aux_dict[i] = row[mapping[i]]       
+            aux_dict[i] = row[mapping[i]]  
         
     elif type(mapping) == list:
         aux_dict = []
         for i in mapping:
             aux_dict.append([i[0], row[i[1]]])
-        
+              
     return aux_dict
 
 
@@ -243,9 +246,7 @@ def soa_marketinginteraktiondatenpush_1(interaction_dict, contact_dict, nvp_dict
     
     
     # first get certificate file  - 20190515*gep new for test purposes
-    from google.cloud import storage
-    import tempfile
-
+    
     def get_cert_file(bucket_in,path_data_pem_in,cert_file_in):
         client_cs = storage.Client()
         bucket_cs = client_cs.get_bucket(bucket_in)
@@ -259,10 +260,10 @@ def soa_marketinginteraktiondatenpush_1(interaction_dict, contact_dict, nvp_dict
             
         return file
     
-    if stage == "ACC":
-        bucket        = "axa-ch-datalake-analytics-dev"
-        path_data_pem = "certificates/acc/"
-        cert_file     = "sas_server_keystore.pem"
+    #if stage == "ACC": # 20190523*gep normal get different cert files for different stages
+    bucket        = "axa-ch-datalake-analytics-dev"
+    path_data_pem = "certificates/acc/"
+    cert_file     = "sas_server_keystore.pem"
     
     filename = get_cert_file(bucket,path_data_pem,cert_file)
     print(filename)
@@ -271,11 +272,21 @@ def soa_marketinginteraktiondatenpush_1(interaction_dict, contact_dict, nvp_dict
     try: 
         #A) Parameter Setting & Function Definition     
         stage_dict = {"DEV":  ["https://soadev.ch.winterthur.com:8443/MarketingInteraktionDatenPush_1", 
-                               r"{}\CCDA\09_Betrieb\00_Files\test-client-soapui.pem".format(sf.platform_is_server("drive"))],
-                      "ACC":  ["https://soaacc.ch.winterthur.com:8443/MarketingInteraktionDatenPush_1", 
-                               filename],
+                              filename],
+#                      "ACC":  ["https://soaacc.ch.winterthur.com:8443/MarketingInteraktionDatenPush_1", 
+#                               filename],
+# Achtung - jetzt noch IP-Adresse direkt aufrufen, später sollte das wieder durch https://soaacc.ch.winterthur.com:8443/ ... ersetzt werden                      
+                      "ACC":  ["https://10.152.124.139:8443/MarketingInteraktionDatenPush_1", 
+                               filename],                      
                       "PROD": ["https://soaprod.ch.winterthur.com:8443/MarketingInteraktionDatenPush_1", 
-                               r"E:\certs\client\sas_server_keystore.pem"]}                                                
+                               filename]}
+ 
+        #stage_dict = {"DEV":  ["https://soadev.ch.winterthur.com:8443/MarketingInteraktionDatenPush_1", 
+        #                       r"{}\CCDA\09_Betrieb\00_Files\test-client-soapui.pem".format(sf.platform_is_server("drive"))],
+        #              "ACC":  ["https://soaacc.ch.winterthur.com:8443/MarketingInteraktionDatenPush_1", 
+        #                       filename],
+        #              "PROD": ["https://soaprod.ch.winterthur.com:8443/MarketingInteraktionDatenPush_1", 
+        #                       r"E:\certs\client\sas_server_keystore.pem"]}        
               
         def aux_asserter(input_list, input_dict): 
             for i in input_list:
@@ -391,7 +402,29 @@ def soa_marketinginteraktiondatenpush_1(interaction_dict, contact_dict, nvp_dict
                        </mar:lpsoi074>
                   </mar:pass_interaktion_kontakt>""".format(interaction_string, contact_string, content_string, nvp_string)
         
-        xsd_file = "{}/CCDA/09_Betrieb/00_Files/MarketingInteraktionDatenPush_1.xsd".format(sf.platform_is_server("drive"))  
+        # xsd_file = "{}/CCDA/09_Betrieb/00_Files/MarketingInteraktionDatenPush_1.xsd".format(sf.platform_is_server("drive"))         
+            # first get certificate file  - 20190515*gep new for test purposes
+    
+        def get_xsd_file(bucket_in,path_data_pem_in,cert_file_in):
+            client_cs = storage.Client()
+            bucket_cs = client_cs.get_bucket(bucket_in)
+    
+            try:
+                file = "{0}/{1}".format(tempfile.gettempdir(),cert_file_in)
+                blob = bucket_cs.blob(path_data_pem_in + cert_file_in)
+                blob.download_to_filename(file)
+            except:
+                print("except")
+            
+            return file
+    
+        if stage == "ACC":
+            bucket        = "axa-ch-raw-dev-dla"
+            path_data_pem = "bindexis/data/various/"
+            xsd_file_get     = "MarketingInteraktionDatenPush_1.xsd"
+    
+        xsd_file = get_xsd_file(bucket,path_data_pem,xsd_file_get)
+        print("xsd ", xsd_file)
         
         if soa_validateschema(data, xsd_file) == False:
             raise AssertionError("XML schema validation failed for: {}".format(data))
@@ -406,10 +439,10 @@ def soa_marketinginteraktiondatenpush_1(interaction_dict, contact_dict, nvp_dict
         #H) POST-Request Execution
         response = soa_apicall(method = "post", url = stage_dict[stage][0], data = data, cert = stage_dict[stage][1])
         status = response.reason
-        
     except Exception:
         status = "Error: {}".format(traceback.format_exc())
-        
+    
+    print("status: ", status) 
     return status
     
 def soa_wrapper_marketinginteraktiondatenpush_1(row, interaction_mapping, contact_mapping, 
@@ -495,11 +528,13 @@ def soa_wrapper_marketinginteraktiondatenpush_1(row, interaction_mapping, contac
                    ("TARGETGROUP",  ""),
                    ("SUBCATEGORY",  ""),
                    ("SUBCATEGORY",  "")]
-              
+    
+      
     Usage Example (recommended to create a new colunm for the API result): 
     df["API_RESULT"] = df.apply(lambda row: soa_wrapper_marketinginteraktiondatenpush_1(row, 
-                            interaction_mapping, contact_mapping, nvp_mapping, "DEV"), axis = 1)"""    
-    
+                            interaction_mapping, contact_mapping, nvp_mapping, "DEV"), axis = 1)
+    """ 
+        
     interaction_dict = soa_dictmapper(row, interaction_mapping)
     contact_dict     = soa_dictmapper(row, contact_mapping)
     nvp_dict         = soa_dictmapper(row, nvp_mapping)    
