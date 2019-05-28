@@ -1,0 +1,6 @@
+runtime: python37
+service: gcp-test-webapp-p3
+
+handlers:
+- url: /.*
+  script: auto

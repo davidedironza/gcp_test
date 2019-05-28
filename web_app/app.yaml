@@ -1,7 +1,14 @@
 runtime: python27
 api_version: 1
 threadsafe: true
+service: gcp-test-webapp
 
 handlers:
 - url: /.*
   script: main.app
+
+libraries:
+- name: ssl
+  version: latest
+- name: Popen
+  version: latest
