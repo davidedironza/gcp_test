@@ -1,0 +1,7 @@
+runtime: python37
+service: gcp-test-webapp-p3-2
+entrypoint: gunicorn -b :$PORT -k tornado main:app
+
+handlers:
+- url: /.*
+  script: auto
